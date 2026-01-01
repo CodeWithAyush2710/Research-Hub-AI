@@ -1,0 +1,25 @@
+# General
+.DS_Store
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+ai_service/.env
+ai_service/secrets.toml
+ai_service/__pycache__/
+
+# Node.js
+node_modules/
+dist/
+build/
+frontend/.env
+frontend/node_modules/
+frontend/.env.local
+
+# IDEs
+.vscode/
+.idea/
