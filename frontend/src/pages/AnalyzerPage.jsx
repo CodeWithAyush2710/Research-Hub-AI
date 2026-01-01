@@ -24,7 +24,7 @@ function AnalyzerPage() {
 
         try {
             // Use env variable for production, or relative path (proxy) for dev
-            const API_BASE = import.meta.env.VITE_API_URL || '';
+            const API_BASE = import.meta.env.VITE_API_URL || 'https://research-hub-ai.onrender.com';
             const response = await axios.post(`${API_BASE}/api/analyze`, { query: searchQuery });
             setPapers(response.data);
         } catch (err) {
