@@ -80,6 +80,10 @@ async def analyze_papers(request: AnalyzeRequest):
 def health_check():
     return {"status": "healthy"}
 
+@app.get("/")
+def root():
+    return {"message": "Research Hub AI Service is Running 🚀"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
