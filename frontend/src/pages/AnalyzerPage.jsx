@@ -8,6 +8,7 @@ import PaperCard from '../components/PaperCard';
 import Footer from '../components/Footer';
 
 import Navbar from '../components/Navbar';
+import Loader from '../components/Loader';
 
 function AnalyzerPage() {
     const [query, setQuery] = useState('');
@@ -62,15 +63,7 @@ function AnalyzerPage() {
                     )}
 
                     {loading && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', margin: '4rem 0' }}
-                        >
-                            <Loader2 className="spin" size={48} color="var(--primary)" />
-                            <p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>Analyzing papers... This may take a minute.</p>
-                        </motion.div>
+                        <Loader text="Gathering and comprehending the latest research papers related to your topic. This may take a moment." />
                     )}
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', maxWidth: '1000px', margin: '0 auto' }}>

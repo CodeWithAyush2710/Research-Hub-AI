@@ -19,9 +19,9 @@ const Footer = () => {
                     style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}
                 >
                     <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', marginBottom: '1rem' }}>
-                        <a href="#" style={iconLinkStyle}><Github size={20} /></a>
-                        <a href="#" style={iconLinkStyle}><Twitter size={20} /></a>
-                        <a href="#" style={iconLinkStyle}><Linkedin size={20} /></a>
+                        <a href="https://github.com/CodeWithAyush2710" target='_blank' style={iconLinkStyle}><Github size={20} /></a>
+                        <a href="https://twitter.com/iamayush2710" target='_blank' style={iconLinkStyle}><Twitter size={20} /></a>
+                        <a href="https://linkedin.com/in/ayush-srivastava-114b58215" target='_blank' style={iconLinkStyle}><Linkedin size={20} /></a>
                     </div>
 
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
