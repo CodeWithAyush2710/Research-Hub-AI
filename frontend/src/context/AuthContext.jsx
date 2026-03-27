@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
     const fetchUser = async () => {
         if (!token) return;
         try {
-            const res = await fetch('http://localhost:8000/api/user/profile', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/user/profile`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
