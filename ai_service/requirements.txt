@@ -7,3 +7,10 @@ langchain-groq
 langchain_community
 langchain_core
 requests
+pymongo
+pymupdf
+pypdf
+passlib
+bcrypt
+python-jose
+python-multipart
