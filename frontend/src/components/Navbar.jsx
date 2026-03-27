@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sparkles, Menu, X } from 'lucide-react';
+import { Sparkles, Menu, X, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const { user, token } = useAuth();
 
     const isActive = (path) => location.pathname === path;
 
@@ -30,6 +32,22 @@ const Navbar = () => {
                 <div className="desktop-nav" style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
                     <NavLink to="/" active={isActive('/')}>Home</NavLink>
                     <NavLink to="/analyze" active={isActive('/analyze')}>Analyze</NavLink>
+                    {token && user ? (
+                        <Link to="/profile" style={{
+                            display: 'flex', alignItems: 'center', gap: '0.5rem',
+                            color: 'var(--text)', textDecoration: 'none', fontWeight: 'bold'
+                        }}>
+                            <User size={18} />
+                            Welcome, {user.name}
+                        </Link>
+                    ) : (
+                        <Link to="/login" style={{
+                            padding: '0.5rem 1rem', background: 'var(--primary)', color: 'white',
+                            borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold'
+                        }}>
+                            Log In / Sign Up
+                        </Link>
+                    )}
                 </div>
 
                 {/* Mobile Menu Button */}
@@ -54,6 +72,11 @@ const Navbar = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', padding: '1rem 2rem', gap: '1rem' }}>
                             <MobileNavLink to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</MobileNavLink>
                             <MobileNavLink to="/analyze" onClick={() => setIsMobileMenuOpen(false)}>Analyze</MobileNavLink>
+                            {token && user ? (
+                                <MobileNavLink to="/profile" onClick={() => setIsMobileMenuOpen(false)}>Profile: {user.name}</MobileNavLink>
+                            ) : (
+                                <MobileNavLink to="/login" onClick={() => setIsMobileMenuOpen(false)}>Log In</MobileNavLink>
+                            )}
                         </div>
                     </motion.div>
                 )}

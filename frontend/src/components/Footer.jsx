@@ -25,7 +25,7 @@ const Footer = () => {
                     </div>
 
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
-                        Built with <Heart size={14} color="#ec4899" fill="#ec4899" /> by Research Hub AI
+                        Built with <Heart size={14} color="#ec4899" fill="#ec4899" /> by Ayush Srivastava
                     </p>
 
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', opacity: 0.7 }}>
