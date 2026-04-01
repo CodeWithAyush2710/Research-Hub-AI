@@ -10,8 +10,7 @@ import Navbar from '../components/Navbar';
 import Loader from '../components/Loader';
 import { useAuth } from '../context/AuthContext';
 
-function AnalyzerPage() {
-    const [searchInput, setSearchInput] = useState('');
+function ReviewPage() {
     const [papers, setPapers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -28,62 +27,43 @@ function AnalyzerPage() {
     };
 
     const handleUnifiedSubmit = async () => {
-        if (selectedFile) {
+        if (!selectedFile) {
+            setError('Please select a PDF to review.');
+            return;
+        }
             
-            if (!token) {
-                alert("Please log in to analyze your own PDFs.");
+        if (!token) {
+            alert("Please log in to receive AI peer review on your PDFs.");
+            navigate('/login');
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+        setPapers([]);
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        
+        try {
+            const response = await axios.post(`${API_BASE}/api/review/pdf`, formData, {
+                headers: {
+                    ...getHeaders(),
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            setPapers([response.data]);
+        } catch (err) {
+            console.error(err);
+            if (err.response?.status === 401) {
                 navigate('/login');
-                return;
+            } else {
+                setError('Failed to process the PDF for review. Ensure it is a valid text-based PDF.');
             }
-
-            setLoading(true);
-            setError(null);
-            setPapers([]);
-
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-            
-            try {
-                const response = await axios.post(`${API_BASE}/api/analyze/pdf`, formData, {
-                    headers: {
-                        ...getHeaders(),
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-                setPapers([response.data]);
-            } catch (err) {
-                console.error(err);
-                if (err.response?.status === 401) {
-                    navigate('/login');
-                } else {
-                    setError('Failed to process the PDF. Ensure it is a valid text-based PDF.');
-                }
-            } finally {
-                setLoading(false);
-                setSelectedFile(null);
-                if(fileInputRef.current) fileInputRef.current.value = '';
-            }
-        } else if (searchInput.trim()) {
-            setLoading(true);
-            setError(null);
-            setPapers([]);
-
-            try {
-                const response = await axios.post(`${API_BASE}/api/analyze`, { query: searchInput }, { headers: getHeaders() });
-                setPapers(response.data);
-            } catch (err) {
-                console.error(err);
-                if (err.response?.status === 401) {
-                    alert("You have reached your guest limit. Please log in to continue searching.");
-                    navigate('/login');
-                } else {
-                    setError('Failed to fetch papers. Please try again.');
-                }
-            } finally {
-                setLoading(false);
-            }
-        } else {
-            setError('Please enter a research topic or select a PDF to analyze.');
+        } finally {
+            setLoading(false);
+            setSelectedFile(null);
+            if(fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
@@ -95,8 +75,7 @@ function AnalyzerPage() {
             return;
         }
         setSelectedFile(file);
-        // Clear text input to avoid confusion since PDF takes priority
-        setSearchInput('');
+        // Remove search reset
     };
 
     return (
@@ -109,27 +88,15 @@ function AnalyzerPage() {
                     animate={{ opacity: 1, y: 0 }}
                     style={{ maxWidth: '800px', margin: '0 auto 4rem auto', textAlign: 'center' }}
                 >
-                    <h1 style={{ marginBottom: '2rem', fontSize: '2.5rem', fontWeight: '800' }}>Search Papers</h1>
+                    <h1 style={{ marginBottom: '2rem', fontSize: '2.5rem', fontWeight: '800' }}>AI Peer Review</h1>
                     
                     <div style={{
                         display: 'flex', flexDirection: 'column', gap: '1.5rem',
                         background: 'var(--surface)', padding: '2rem', borderRadius: '1rem',
                         border: '1px solid var(--border)', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'
                     }}>
-                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                            <input
-                                type="text"
-                                value={searchInput}
-                                onChange={(e) => { setSearchInput(e.target.value); setSelectedFile(null); if(fileInputRef.current) fileInputRef.current.value = ''; }}
-                                placeholder="Enter research topic..."
-                                disabled={loading}
-                                style={{
-                                    flex: 1, minWidth: '200px', padding: '1rem', fontSize: '1.1rem',
-                                    borderRadius: '0.5rem', border: '1px solid var(--border)',
-                                    background: 'var(--background)', color: 'var(--text)', outline: 'none'
-                                }}
-                            />
-                            
+                        <p style={{color: 'var(--text-secondary)'}}>Upload your paper draft and receive constructive feedback on its structure, methodology, and flow.</p>
+                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                             <input 
                                 type="file" 
                                 accept="application/pdf" 
@@ -158,15 +125,15 @@ function AnalyzerPage() {
 
                         <button 
                             onClick={handleUnifiedSubmit}
-                            disabled={loading || (!searchInput.trim() && !selectedFile)}
+                            disabled={loading || !selectedFile}
                             style={{
                                 width: '100%', padding: '1rem', background: 'var(--primary)',
                                 color: 'white', border: 'none', borderRadius: '0.5rem',
-                                fontSize: '1.2rem', fontWeight: 'bold', cursor: loading || (!searchInput.trim() && !selectedFile) ? 'not-allowed' : 'pointer',
-                                transition: 'background 0.2s', opacity: loading || (!searchInput.trim() && !selectedFile) ? 0.7 : 1
+                                fontSize: '1.2rem', fontWeight: 'bold', cursor: loading || !selectedFile ? 'not-allowed' : 'pointer',
+                                transition: 'background 0.2s', opacity: loading || !selectedFile ? 0.7 : 1
                             }}
                         >
-                            {loading ? 'Processing...' : 'Search / Analyze'}
+                            {loading ? 'Processing...' : '💡 Request AI Review'}
                         </button>
 
                     </div>
@@ -218,4 +185,4 @@ function AnalyzerPage() {
     );
 }
 
-export default AnalyzerPage;
+export default ReviewPage;

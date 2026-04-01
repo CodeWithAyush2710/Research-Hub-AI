@@ -32,6 +32,7 @@ const Navbar = () => {
                 <div className="desktop-nav" style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
                     <NavLink to="/" active={isActive('/')}>Home</NavLink>
                     <NavLink to="/analyze" active={isActive('/analyze')}>Analyze</NavLink>
+                    <NavLink to="/review" active={isActive('/review')}>Peer Review</NavLink>
                     {token && user ? (
                         <Link to="/profile" style={{
                             display: 'flex', alignItems: 'center', gap: '0.5rem',
@@ -72,6 +73,7 @@ const Navbar = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', padding: '1rem 2rem', gap: '1rem' }}>
                             <MobileNavLink to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</MobileNavLink>
                             <MobileNavLink to="/analyze" onClick={() => setIsMobileMenuOpen(false)}>Analyze</MobileNavLink>
+                            <MobileNavLink to="/review" onClick={() => setIsMobileMenuOpen(false)}>Peer Review</MobileNavLink>
                             {token && user ? (
                                 <MobileNavLink to="/profile" onClick={() => setIsMobileMenuOpen(false)}>Profile: {user.name}</MobileNavLink>
                             ) : (

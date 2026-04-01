@@ -176,6 +176,36 @@ class AgentCoordinator:
         self.code_implementation_agent = CodeImplementationAgent("CodeImplementationAgent", llm)
         self.citations_references_agent = CitationsReferencesAgent("CitationsReferencesAgent", llm)
         self.recommendation_agent = RecommendationAgent("RecommendationAgent", llm)
+        
+        # Feedback Agents
+        self.peer_review_agent = PeerReviewAgent("PeerReviewAgent", llm)
+        self.structure_flow_agent = StructureFlowAgent("StructureFlowAgent", llm)
+        self.constructive_editor_agent = ConstructiveEditorAgent("ConstructiveEditorAgent", llm)
+
+    async def process_draft_feedback(self, text, filename):
+        logger.info(f"Coordinator: Processing draft feedback for '{filename}'")
+        
+        peer_review = await self.peer_review_agent.process(text)
+        structure = await self.structure_flow_agent.process(text)
+        rewrites = await self.constructive_editor_agent.process(text)
+
+        logger.info(f"Coordinator: Finished draft feedback for '{filename}'")
+
+        # Returning in format compatible with PaperCard
+        return {
+            "title": f"Review: {filename}",
+            "link": "",
+            "original_abstract": "Uploaded PDF Draft.",
+            "summary": "### 📖 AI Peer Review\n\n" + peer_review['peer_review'],
+            "key_findings": "### 🏗️ Structure & Flow\n\n" + structure['structure_flow'],
+            "trends": "### ✍️ Constructive Rewrites\n\n" + rewrites['rewrites'],
+            "advantages_disadvantages": "_Review mode currently provides Peer Review, Structure Flow, and Rewrites. (Other tabs remain empty)._",
+            "related_work": "",
+            "code_implementations": "",
+            "citations_references": "",
+            "future_work": ""
+        }
+
 
     async def process_paper(self, paper):
         logger.info(f"Coordinator: Processing paper '{paper['title']}'")
@@ -206,3 +236,52 @@ class AgentCoordinator:
             "citations_references": citations['citations_references'],
             "future_work": future['future_work'],
         }
+
+    async def process_pdf_normal(self, text, filename):
+        logger.info(f"Coordinator: Processing normal PDF '{filename}'")
+        
+        # We simulate an ArXiv paper dictionary for compatibility
+        simulated_paper = {
+            "title": f"Uploaded PDF: {filename}",
+            "link": "",
+            "summary": text[:15000] # Pass truncated text as the "summary/abstract" for agents
+        }
+        
+        return await self.process_paper(simulated_paper)
+
+
+class PeerReviewAgent(BaseAgent):
+    async def process(self, text):
+        logger.info(f"{self.name} acting as peer reviewer.")
+        await asyncio.sleep(RATE_LIMIT_DELAY)
+        messages = [
+            SystemMessage(content="You are a strict, constructive peer reviewer. Critique the methodology, claims, and logical coherence in this draft. Highlight weak points:"),
+            HumanMessage(content=text)
+        ]
+        response = await self.llm.ainvoke(messages)
+        return {'peer_review': response.content.strip()}
+
+
+class StructureFlowAgent(BaseAgent):
+    async def process(self, text):
+        logger.info(f"{self.name} checking structure and flow.")
+        await asyncio.sleep(RATE_LIMIT_DELAY)
+        messages = [
+            SystemMessage(content="Evaluate paragraphs, transitions, and overall structure. Does the argument flow logically? Point out structural issues:"),
+            HumanMessage(content=text[:15000]) # Truncating slightly to avoid limit errors on huge PDFs if needed
+        ]
+        response = await self.llm.ainvoke(messages)
+        return {'structure_flow': response.content.strip()}
+
+
+class ConstructiveEditorAgent(BaseAgent):
+    async def process(self, text):
+        logger.info(f"{self.name} providing line-item rewrites.")
+        await asyncio.sleep(RATE_LIMIT_DELAY)
+        messages = [
+            SystemMessage(content="Provide 3-5 specific examples of poorly written sentences in this draft, and rewrite them to meet high academic standards:"),
+            HumanMessage(content=text[:15000])
+        ]
+        response = await self.llm.ainvoke(messages)
+        return {'rewrites': response.content.strip()}
+

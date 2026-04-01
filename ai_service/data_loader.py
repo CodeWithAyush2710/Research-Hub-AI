@@ -1,5 +1,6 @@
 import requests
 import xml.etree.ElementTree as ET
+import fitz  # PyMuPDF
 
 class DataLoader:
     def __init__(self):
@@ -20,3 +21,15 @@ class DataLoader:
                 for entry in root.findall("{http://www.w3.org/2005/Atom}entry")
             ]
         return []
+
+    def extract_text_from_pdf_bytes(self, pdf_bytes: bytes) -> str:
+        text = ""
+        try:
+            doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+            for page in doc:
+                text += page.get_text()
+            return text
+        except Exception as e:
+            print(f"❌ Error extracting PDF: {e}")
+            return ""
+

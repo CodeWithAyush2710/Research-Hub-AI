@@ -12,3 +12,10 @@ class AIProcessor:
             results.append(await self.coordinator.process_paper(paper))
             await asyncio.sleep(5)  # Wait between papers
         return results
+
+    async def process_draft_feedback_async(self, text, filename):
+        return await self.coordinator.process_draft_feedback(text, filename)
+
+    async def process_pdf_normal_async(self, text, filename):
+        return await self.coordinator.process_pdf_normal(text, filename)
+

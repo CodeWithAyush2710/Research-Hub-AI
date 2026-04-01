@@ -213,6 +213,49 @@ async def analyze_pdf(file: UploadFile = File(...), current_user: str = Depends(
         print(f"❌ Error processing PDF: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/review/pdf", response_model=PaperResponse)
+async def review_pdf(file: UploadFile = File(...), current_user: str = Depends(require_auth)):
+    try:
+        content_bytes = await file.read()
+        file_hash = hashlib.sha256(content_bytes).hexdigest() + "_review" # differentiate hash from normal analysis
+        
+        # Check cache
+        if analyses_collection is not None:
+            cached = analyses_collection.find_one({"hash": file_hash})
+            if cached:
+                cached.pop("_id", None)
+                users_collection.update_one(
+                    {"_id": ObjectId(current_user)},
+                    {"$addToSet": {"uploaded_papers": "Review: " + cached["title"]}}
+                )
+                return cached
+                
+        # Parse PDF
+        text = extract_text_from_pdf(content_bytes)
+        if len(text) > 15000:
+            text = text[:15000]
+            
+        # Process specific paper for review/feedback
+        result = await ai_processor.process_draft_feedback_async(text, file.filename)
+        result["hash"] = file_hash
+        
+        if analyses_collection is not None:
+            analyses_collection.insert_one(result.copy())
+            
+        if users_collection is not None:
+            users_collection.update_one(
+                {"_id": ObjectId(current_user)},
+                {"$addToSet": {"uploaded_papers": result["title"]}}
+            )
+            
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error reviewing PDF: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/user/profile")
 async def get_profile(current_user: str = Depends(require_auth)):
     if users_collection is None:

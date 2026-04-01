@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Link as LinkIcon, Download, ChevronRight, BookOpen, Lightbulb, TrendingUp, AlertTriangle, GitBranch, Code, Quote, Compass } from 'lucide-react';
+import { FileText, Link as LinkIcon, Download, ChevronRight, BookOpen, Lightbulb, TrendingUp, AlertTriangle, GitBranch, Code, Quote, Compass, Copy, Check } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 const tabs = [
     { id: 'summary', label: 'Summary', icon: BookOpen },
@@ -81,43 +82,79 @@ const PaperCard = ({ paper }) => {
 };
 
 const ContentRenderer = ({ content, type }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(content);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
     if (!content) return <p style={{ fontStyle: 'italic', opacity: 0.5 }}>No information available.</p>;
 
-    if (type === 'code_implementations') {
-        return (
-            <div style={{ maxWidth: '100%', overflow: 'hidden' }}>
-                <pre style={{
-                    background: '#000',
-                    padding: '1rem',
-                    borderRadius: '0.5rem',
-                    overflowX: 'auto',
-                    fontSize: '0.9rem',
-                    color: '#a5f3fc',
-                    maxWidth: '100%',
-                    whiteSpace: 'pre-wrap',       /* Wrap text so it doesn't force scroll if not needed */
-                    wordBreak: 'break-word'       /* Break long words */
-                }}>
-                    <code>{content}</code>
-                </pre>
-            </div>
-        )
-    }
-
-    // Basic markdown-like parsing for bullet points
-    const lines = content.split('\n');
     return (
-        <div style={{
-            color: 'var(--text-secondary)',
-            lineHeight: 1.7,
-            width: '100%',
-            overflowX: 'auto',
-            wordWrap: 'break-word'
-        }}>
-            {lines.map((line, i) => (
-                <p key={i} style={{ marginBottom: '0.5rem', maxWidth: '100%' }}>
-                    {line}
-                </p>
-            ))}
+        <div style={{ position: 'relative' }}>
+            <button
+                onClick={handleCopy}
+                style={{
+                    position: 'absolute',
+                    top: '-2.5rem',
+                    right: 0,
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-secondary)',
+                    borderRadius: '0.25rem',
+                    padding: '0.35rem 0.75rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: '0.8rem',
+                    fontWeight: '500',
+                    zIndex: 10,
+                    transition: 'all 0.2s'
+                }}
+                title="Copy to clipboard"
+            >
+                {copied ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
+                {copied ? <span style={{color: '#10b981'}}>Copied</span> : 'Copy'}
+            </button>
+            <div className="markdown-body" style={{ color: 'var(--text-secondary)', lineHeight: 1.7, width: '100%', overflowX: 'auto', wordWrap: 'break-word' }}>
+                <ReactMarkdown
+                   components={{
+                       h1: ({node, ...props}) => <h3 style={{color: 'var(--text)', fontWeight: 'bold', marginTop: '1.5rem', marginBottom: '0.5rem'}} {...props} />,
+                       h2: ({node, ...props}) => <h4 style={{color: 'var(--text)', fontWeight: 'bold', marginTop: '1.5rem', marginBottom: '0.5rem'}} {...props} />,
+                       h3: ({node, ...props}) => <h5 style={{color: 'var(--text)', fontWeight: 'bold', marginTop: '1rem', marginBottom: '0.5rem'}} {...props} />,
+                       p: ({node, ...props}) => <p style={{marginBottom: '0.75rem', maxWidth: '100%'}} {...props} />,
+                       strong: ({node, ...props}) => <strong style={{color: 'var(--text)', fontWeight: '600'}} {...props} />,
+                       em: ({node, ...props}) => <em style={{color: 'var(--primary)', fontStyle: 'italic'}} {...props} />,
+                       code: ({node, inline, ...props}) => 
+                           inline ? 
+                           <code style={{background: 'rgba(255,255,255,0.1)', color: '#e2e8f0', padding: '0.1rem 0.3rem', borderRadius: '0.25rem'}} {...props} /> :
+                           <div style={{ maxWidth: '100%', overflow: 'hidden', margin: '1rem 0' }}>
+                               <pre style={{
+                                   background: '#0a0a0a',
+                                   border: '1px solid var(--border)',
+                                   padding: '1.25rem',
+                                   borderRadius: '0.5rem',
+                                   overflowX: 'auto',
+                                   fontSize: '0.9rem',
+                                   color: '#a5f3fc',
+                                   maxWidth: '100%',
+                                   whiteSpace: 'pre-wrap',
+                                   wordBreak: 'break-word'
+                               }}>
+                                   <code {...props} />
+                               </pre>
+                           </div>,
+                       ul: ({node, ...props}) => <ul style={{marginBottom: '1rem', paddingLeft: '1.5rem'}} {...props} />,
+                       ol: ({node, ...props}) => <ol style={{marginBottom: '1rem', paddingLeft: '1.5rem'}} {...props} />,
+                       li: ({node, ...props}) => <li style={{marginBottom: '0.5rem'}} {...props} />
+                   }}
+                >
+                    {content}
+                </ReactMarkdown>
+            </div>
         </div>
     );
 }
